@@ -1,0 +1,91 @@
+from tkinter import*
+from tkinter import messagebox
+
+import requests
+root=Tk()                                                                     
+
+def handleLogin(emailInput,passwordInput):                                       
+    if emailInput.get()=="xyz@abc.com" and passwordInput.get()=="1234":     
+        routeWindow()
+    else:
+        messagebox.showerror("Login Error","You entered incorrect Email/Password" )
+
+def eraseWindow():
+    for i in root.pack_slaves():
+        i.destroy()
+
+def headerMenu():                                                               
+    menu=Menu(root)
+    root.config(menu=menu)
+    filemenu=Menu(menu)
+    menu.add_cascade(label="Home",menu=filemenu)                                
+    filemenu.add_cascade(label="Train Route", command=lambda:login())
+    filemenu.add_cascade(label="Check PNR", command=lambda:login())
+    filemenu.add_cascade(label="Train Status", command=lambda:login())
+    filemenu.add_cascade(label="Train between Stations", command=lambda:login())
+
+    exitmenu=Menu(menu)
+    menu.add_cascade(label="Settings",menu=exitmenu)                            
+    exitmenu.add_command(label="Change Password",command=lambda:login())
+    exitmenu.add_command(label="Logout",command=lambda:login())
+
+def login():
+    pass
+
+def routeWindow():                                                              
+                                                                                
+    eraseWindow()
+    headerMenu()
+
+    label1=Label(root,text="Train Route", bg="#5D24ED", fg="#fff")                
+    label1.configure(font=("Constantia",18,"bold"))                   
+    label1.pack(pady=(10,15))
+   
+    trainInput=Entry(root)
+    trainInput.pack(pady=(0,30),ipadx=50,ipady=10)
+  
+    routeBtn=Button(root,text="Fetch Stations",bg="#fff",width=20,height=2,command=lambda:fetchstations(trainInput,result))
+    routeBtn.pack()
+
+    result = Label(root, text="",bg="#5D24ED",fg="#fff")
+    result.configure(font=("Constantia", 18, "bold"))
+    result.pack(pady=(10, 15))
+
+def fetchstations(trainNo,result):
+    url="https://api.railwayapi.com/v2/route/train/{}/apikey/Your_Key/".format(trainNo.get())
+    data=requests.get(url)
+    response=data.json()['route']                           
+    stations=""
+    arrival=""
+    departure=""
+
+    for i in response:
+        stations=stations+i['station']['name']+"   "+i['schdep']+"   "+i['scharr']+"   "+str(i['distance'])+"\n"
+
+    result.configure(text=stations)                       
+      
+def mainWindow():                                                                
+    root.title("MY IRCTC")                                                     
+    root.minsize(400,600)                                                        
+    root.maxsize(400,600)                                                        
+    root.configure(background="#5D24ED")
+    label1=Label(root,text="MY IRCTC", bg="#5D24ED", fg="#fff")               
+    label1.configure(font=("Constantia",18,"bold"))                   
+    label1.pack(pady=(30,30))                                                    
+    label2=Label(root,text="Kindly Login To Proceed", bg="#5D24ED", fg="#fff")
+    label2.configure(font=("Constantia",14,"underline"))                   
+    label2.pack(pady=(0,30))
+    label3=Label(root,text="Email", bg="#5D24ED", fg="#fff")
+    label3.configure(font=("Constantia",12))                   
+    label3.pack(pady=(0,5))
+    emailInput=Entry(root)
+    emailInput.pack(pady=(0,20),ipadx=50,ipady=10)
+    label4=Label(root,text="Password", bg="#5D24ED", fg="#fff")
+    label4.configure(font=("Constantia",12))                   
+    label4.pack(pady=(0,5))
+    passwordInput=Entry(root,show="*")
+    passwordInput.pack(pady=(0,10),ipadx=50,ipady=10)
+    loginBtn=Button(root,text="Login Here",bg="#fff",width=20,height=2,command=lambda:handleLogin(emailInput,passwordInput))             
+    loginBtn.pack()
+    root.mainloop()
+mainWindow()
